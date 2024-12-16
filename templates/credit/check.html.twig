@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Credit Check{% endblock %}
+
+{% block body %}
+    <h1>Credit Check for {{ client.name }} {{ client.lastName }}</h1>
+
+    {% if isEligible %}
+        <div class="alert alert-success">
+            <strong>Eligible for credit!</strong>
+        </div>
+        <a href="{{ path('credit_issue', { client_id: client.id }) }}" class="btn btn-primary">Issue Credit</a>
+    {% else %}
+        <div class="alert alert-danger">
+            <strong>Not eligible for credit.</strong>
+            <ul>
+                {% for reason in reasons %}
+                    <li>{{ reason }}</li>
+                {% endfor %}
+            </ul>
+            <h2>Client Information</h2>
+            <table class="table table-bordered">
+                <tr>
+                    <th>ID</th>
+                    <td>{{ client.id }}</td>
+                </tr>
+                <tr>
+                    <th>Name</th>
+                    <td>{{ client.name }}</td>
+                </tr>
+                <tr>
+                    <th>Last Name</th>
+                    <td>{{ client.lastName }}</td>
+                </tr>
+                <tr>
+                    <th>Age</th>
+                    <td>{{ client.age }}</td>
+                </tr>
+                <tr>
+                    <th>SSN</th>
+                    <td>{{ client.ssn }}</td>
+                </tr>
+                <tr>
+                    <th>Address</th>
+                    <td>{{ client.address }}</td>
+                </tr>
+                <tr>
+                    <th>State</th>
+                    <td>{{ client.state }}</td>
+                </tr>
+                <tr>
+                    <th>Email</th>
+                    <td>{{ client.email }}</td>
+                </tr>
+                <tr>
+                    <th>Phone Number</th>
+                    <td>{{ client.phoneNumber }}</td>
+                </tr>
+                <tr>
+                    <th>Credit Score</th>
+                    <td>{{ client.creditScore }}</td>
+                </tr>
+                <tr>
+                    <th>Monthly Income</th>
+                    <td>${{ client.monthlyIncome }}</td>
+                </tr>
+            </table>
+        </div>
+    {% endif %}
+
+    <a href="{{ path('client_list') }}" class="btn btn-secondary">Back to Client List</a>
+{% endblock %}

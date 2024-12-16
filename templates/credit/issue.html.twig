@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Credit Check{% endblock %}
+
+{% block body %}
+<h1>Credit issue for {{ client.name }} {{ client.lastName }}</h1>
+
+<div class="alert alert-success">
+    <strong>Credit has been issued!</strong>
+</div>
+{% endblock %}

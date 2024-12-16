@@ -33,6 +33,7 @@ class Client
     private string $address;
 
     #[ORM\Column(length: 2)]
+    // todo: use enum
     private string $state;
 
     #[ORM\Column(length: 100)]
@@ -48,9 +49,9 @@ class Client
     private float $monthlyIncome;
 
     /**
-     * @var Collection<int, ClientCredit>
+     * @var Collection<int, Credit>
      */
-    #[ORM\OneToMany(targetEntity: ClientCredit::class, mappedBy: 'client', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Credit::class, mappedBy: 'client', orphanRemoval: true)]
     private Collection $clientCredits;
 
     public function __construct(string $name, string $lastName, int $age, string $ssn, string $address, string $state, string $email, string $phoneNumber, int $creditScore, float $monthlyIncome)
@@ -66,6 +67,11 @@ class Client
         $this->creditScore = $creditScore;
         $this->monthlyIncome = $monthlyIncome;
         $this->clientCredits = new ArrayCollection();
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
     }
 
     public function getName(): string
@@ -169,7 +175,7 @@ class Client
     }
 
     /**
-     * @return Collection<int, ClientCredit>
+     * @return Collection<int, Credit>
      */
     public function getClientCredits(): Collection
     {

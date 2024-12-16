@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Credit List{% endblock %}
+
+{% block body %}
+    <h1>Credit List</h1>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Product Name</th>
+            <th>Amount</th>
+            <th>Term (Months)</th>
+            <th>Interest Rate (%)</th>
+            <th>Client</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for credit in credits %}
+            <tr>
+                <td>{{ credit.id }}</td>
+                <td>{{ credit.productName }}</td>
+                <td>${{ credit.amount }}</td>
+                <td>{{ credit.term }}</td>
+                <td>{{ credit.interestRate }}</td>
+                <td>{{ credit.client.name }} {{ credit.client.lastName }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('client_list') }}" class="btn btn-secondary mt-3">Back to Client List</a>
+{% endblock %}

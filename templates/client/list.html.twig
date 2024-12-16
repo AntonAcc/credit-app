@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Client List{% endblock %}
+
+{% block body %}
+    <h1>Client List</h1>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Age</th>
+            <th>SSN</th>
+            <th>Address</th>
+            <th>State</th>
+            <th>Credit Score</th>
+            <th>Monthly Income</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for client in clients %}
+            <tr>
+                <td>{{ client.id }}</td>
+                <td>{{ client.name }}</td>
+                <td>{{ client.lastName }}</td>
+                <td>{{ client.email }}</td>
+                <td>{{ client.phoneNumber }}</td>
+                <td>{{ client.age }}</td>
+                <td>{{ client.ssn }}</td>
+                <td>{{ client.address }}</td>
+                <td>{{ client.state }}</td>
+                <td>{{ client.creditScore }}</td>
+                <td>${{ client.monthlyIncome }}</td>
+                <td>
+                    <a href="{{ path('client_edit', { id: client.id }) }}" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="{{ path('credit_check', { client_id: client.id }) }}" class="btn btn-sm btn-info">Check Credit</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

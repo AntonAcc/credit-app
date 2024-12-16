@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Repository\ClientCreditRepository;
+use App\Repository\CreditRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Table;
 
-#[ORM\Entity(repositoryClass: ClientCreditRepository::class)]
-class ClientCredit
+#[ORM\Entity(repositoryClass: CreditRepository::class)]
+#[Table(name: 'client_credit')]
+class Credit
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -45,6 +47,11 @@ class ClientCredit
         $this->interestRate = $interestRate;
         $this->amount = $amount;
         $this->client = $client;
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
     }
 
     public function getProductName(): string
