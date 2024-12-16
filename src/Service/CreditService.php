@@ -5,18 +5,20 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Entity\Client;
+use App\Entity\Client\AddressState as AddressStateEnum;
 use App\Entity\Credit;
 use App\Entity\Product;
+use App\Service\CreditService\RandomDecisionCached;
+use App\Service\CreditService\EligibilityCheck\Chain as EligibilityCheckChain;
+use App\Service\CreditService\EligibilityCheck\NyRandomDecision;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Contracts\Cache\CacheInterface;
-use Symfony\Component\Cache\CacheItem;
 
 readonly class CreditService
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
-        private CacheInterface $cache,
-        private NotificationService  $notificationService,
+        private RandomDecisionCached   $randomDecisionCached,
+        private NotificationService    $notificationService,
     ) {}
 
     public function save(Credit $credit): void
@@ -27,42 +29,12 @@ readonly class CreditService
 
     public function getRejectionReasons(Client $client): array
     {
-        $reasons = [];
-        if ($client->getCreditScore() <= 500) {
-            $reasons[] = 'Credit score is too low.';
-        }
-        if ($client->getMonthlyIncome() < 1000) {
-            $reasons[] = 'Monthly income is less than $1000.';
-        }
-        if ($client->getAge() < 18 || $client->getAge() > 60) {
-            $reasons[] = 'Client age is not between 18 and 60.';
-        }
-        // todo: move to constants or enum
-        if (!in_array($client->getState(), ['CA', 'NY', 'NV'])) {
-            $reasons[] = 'Client does not live in CA, NY, or NV.';
-        }
-
-        // todo: use constant or enum
-        if ($client->getState() === 'NY' && empty($reasons)) {
-            $cacheKey = 'credit_decision_' . $client->getId();
-
-            $decision = $this->cache->get($cacheKey, function (CacheItem $item) {
-                $item->expiresAfter(60 * 5); // memorise decision for 5 minutes
-
-                return random_int(0, 1) === 1;
-            });
-
-            if ($decision === 0) {
-                $reasons[] = 'Random rejection for NY clients.';
-            }
-        }
-
-        return $reasons;
+        return $this->getEligibilityCheckChain($client)->getRejectionReasons();
     }
 
     public function isEligible(Client $client): bool
     {
-        return count($this->getRejectionReasons($client)) === 0;
+        return $this->getEligibilityCheckChain($client)->isEligible();
     }
 
     public function issue(Client $client): void
@@ -70,8 +42,7 @@ readonly class CreditService
         $product = $this->getProduct();
 
         $interestRate = $product->getInterestRate();
-        // todo: use constant or enum
-        if ($client->getState() === 'CA') {
+        if ($client->getState() === AddressStateEnum::CALIFORNIA->value) {
             $interestRate += 11.49;
         }
 
@@ -85,10 +56,15 @@ readonly class CreditService
 
         $this->save($credit);
 
-        $cacheKey = 'credit_decision_' . $client->getId();
-        $this->cache->delete($cacheKey);
+        $this->randomDecisionCached->deleteByClient($client);
 
         $this->notificationService->sendCreditNotification($credit);
+    }
+
+    private function getEligibilityCheckChain(Client $client): EligibilityCheckChain
+    {
+        return new EligibilityCheckChain($client)
+            ->with(new NyRandomDecision($client, $this->randomDecisionCached));
     }
 
     private function getProduct(): Product

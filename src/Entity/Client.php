@@ -33,7 +33,7 @@ class Client
     private string $address;
 
     #[ORM\Column(length: 2)]
-    // todo: use enum
+    // todo: use enum AddressState
     private string $state;
 
     #[ORM\Column(length: 100)]
