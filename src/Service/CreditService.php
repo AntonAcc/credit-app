@@ -9,16 +9,16 @@ use App\Entity\Client\AddressState as AddressStateEnum;
 use App\Entity\Credit;
 use App\Entity\Product;
 use App\Service\CreditService\RandomDecisionCached;
-use App\Service\CreditService\EligibilityCheck\Chain as EligibilityCheckChain;
-use App\Service\CreditService\EligibilityCheck\NyRandomDecision;
+use App\Service\CreditService\EligibilityCheck\ChainBuilder as EligibilityCheckChainBuilder;
 use Doctrine\ORM\EntityManagerInterface;
 
 readonly class CreditService
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
-        private RandomDecisionCached   $randomDecisionCached,
-        private NotificationService    $notificationService,
+        private RandomDecisionCached $randomDecisionCached,
+        private EligibilityCheckChainBuilder $eligibilityCheckChainBuilder,
+        private NotificationService $notificationService,
     ) {}
 
     public function save(Credit $credit): void
@@ -27,14 +27,14 @@ readonly class CreditService
         $this->entityManager->flush();
     }
 
-    public function getRejectionReasons(Client $client): array
-    {
-        return $this->getEligibilityCheckChain($client)->getRejectionReasons();
-    }
-
     public function isEligible(Client $client): bool
     {
-        return $this->getEligibilityCheckChain($client)->isEligible();
+        return $this->eligibilityCheckChainBuilder->build($client)->isEligible();
+    }
+
+    public function getRejectionReasons(Client $client): array
+    {
+        return $this->eligibilityCheckChainBuilder->build($client)->getRejectionReasons();
     }
 
     public function issue(Client $client): void
@@ -59,12 +59,6 @@ readonly class CreditService
         $this->randomDecisionCached->deleteByClient($client);
 
         $this->notificationService->sendCreditNotification($credit);
-    }
-
-    private function getEligibilityCheckChain(Client $client): EligibilityCheckChain
-    {
-        return new EligibilityCheckChain($client)
-            ->with(new NyRandomDecision($client, $this->randomDecisionCached));
     }
 
     private function getProduct(): Product

@@ -14,13 +14,6 @@ class Chain
     private bool|null $isEligible = null;
     private array|null $rejectionReasons = null;
 
-    public function __construct(Client $client) {
-        $this->checks[] = new CreditScore($client);
-        $this->checks[] = new MonthlyIncome($client);
-        $this->checks[] = new Age($client);
-        $this->checks[] = new AddressState($client);
-    }
-
     public function with(CheckInterface $check): self
     {
         $this->checks[] = $check;
