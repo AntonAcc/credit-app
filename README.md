@@ -1,4 +1,4 @@
-# Test Assignment - Tournament Manager
+# Test Assignment - Credit App
 
 ## Assignment specifications:
 
