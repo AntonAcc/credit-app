@@ -21,6 +21,6 @@ class CreditScore implements CheckInterface
 
     public function getRejectionReason(): string
     {
-        return sprintf('Credit score is less than %s', self::THRESHOLD);
+        return sprintf('Credit score is less than %s', self::THRESHOLD + 1);
     }
 }
