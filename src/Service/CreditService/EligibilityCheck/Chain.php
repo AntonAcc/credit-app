@@ -17,6 +17,7 @@ class Chain
     public function with(CheckInterface $check): self
     {
         $this->checks[] = $check;
+        $this->resetCachedData();
 
         return $this;
     }
@@ -52,5 +53,11 @@ class Chain
         if (count($this->rejectionReasons) > 0) {
             $this->isEligible = false;
         }
+    }
+
+    private function resetCachedData(): void
+    {
+        $this->isEligible = null;
+        $this->rejectionReasons = null;
     }
 }

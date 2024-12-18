@@ -87,5 +87,39 @@ class ChainTest extends TestCase
         $this->assertFalse($chain->isEligible());
         $this->assertEquals(5, count($chain->getRejectionReasons()));
     }
+
+    public function testResetAfterAddingAnotherCheckEligibility(): void
+    {
+        $checkRejected = $this->createMock(CheckInterface::class);
+        $checkRejected->method('isEligible')->willReturn(false);
+
+        $chain = new EligibilityCheckChain();
+
+        $this->assertTrue($chain->isEligible());
+
+        $chain->with($checkRejected);
+
+        $this->assertFalse($chain->isEligible());
+    }
+
+    public function testResetAfterAddingAnotherCheckRejectionReasons(): void
+    {
+        $checkRejected = $this->createMock(CheckInterface::class);
+        $checkRejected->method('isEligible')->willReturn(false);
+
+        $chain = new EligibilityCheckChain();
+
+        $this->assertEquals(0, count($chain->getRejectionReasons()));
+
+        $chain->with($checkRejected);
+
+        $this->assertEquals(1, count($chain->getRejectionReasons()));
+
+        $chain->with($checkRejected);
+
+        $this->assertEquals(2, count($chain->getRejectionReasons()));
+    }
 }
+
+
 
